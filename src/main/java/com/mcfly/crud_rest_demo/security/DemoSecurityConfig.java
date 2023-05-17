@@ -39,14 +39,13 @@ public class DemoSecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
-        httpSecurity.authorizeHttpRequests(configurer -> {
-            configurer
-                    .requestMatchers(HttpMethod.GET, "/api/employees").hasRole("EMPLOYEE")
-                    .requestMatchers(HttpMethod.GET, "/api/employees/**").hasRole("EMPLOYEE")
-                    .requestMatchers(HttpMethod.POST, "/api/employees").hasRole("MANAGER")
-                    .requestMatchers(HttpMethod.PUT, "/api/employees").hasRole("MANAGER")
-                    .requestMatchers(HttpMethod.DELETE, "/api/employees/**").hasRole("ADMIN");
-        });
+        httpSecurity.authorizeHttpRequests(configurer ->
+                configurer
+                        .requestMatchers(HttpMethod.GET, "/api/employees").hasRole("EMPLOYEE")
+                        .requestMatchers(HttpMethod.GET, "/api/employees/**").hasRole("EMPLOYEE")
+                        .requestMatchers(HttpMethod.POST, "/api/employees").hasRole("MANAGER")
+                        .requestMatchers(HttpMethod.PUT, "/api/employees").hasRole("MANAGER")
+                        .requestMatchers(HttpMethod.DELETE, "/api/employees/**").hasRole("ADMIN"));
         httpSecurity.httpBasic();               // Enable basic authentication.
         httpSecurity.csrf().disable();          // There is no need to protect against csrf attacks for REST API (stateless).
         return httpSecurity.build();
