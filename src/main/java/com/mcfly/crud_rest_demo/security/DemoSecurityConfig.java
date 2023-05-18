@@ -1,24 +1,28 @@
 package com.mcfly.crud_rest_demo.security;
 
+import com.mcfly.crud_rest_demo.service.UserService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.provisioning.JdbcUserDetailsManager;
-import org.springframework.security.provisioning.UserDetailsManager;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-
-import javax.sql.DataSource;
 
 @Configuration
 public class DemoSecurityConfig {
 
     @Bean
-    public UserDetailsManager userDetailsManager(DataSource dataSource) {
-        final JdbcUserDetailsManager jdbcUserDetailsManager = new JdbcUserDetailsManager(dataSource);
-        jdbcUserDetailsManager.setUsersByUsernameQuery("select user_id, pw, active from members where user_id=?");
-        jdbcUserDetailsManager.setAuthoritiesByUsernameQuery("select user_id, role from roles where user_id=?");
-        return jdbcUserDetailsManager;
+    public BCryptPasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public DaoAuthenticationProvider authenticationProvider(UserService userService) {
+        final DaoAuthenticationProvider auth = new DaoAuthenticationProvider();
+        auth.setUserDetailsService(userService);
+        auth.setPasswordEncoder(passwordEncoder());
+        return auth;
     }
 
     @Bean
@@ -34,31 +38,4 @@ public class DemoSecurityConfig {
         httpSecurity.csrf().disable();          // There is no need to protect against csrf attacks for REST API (stateless).
         return httpSecurity.build();
     }
-
-    /* Hardcoded users.
-    @Bean
-    public InMemoryUserDetailsManager userDetailsManager() {
-        final UserDetails john
-                = User.builder()
-                .username("john")
-                .password("{noop}test123")
-                .roles("EMPLOYEE")
-                .build();
-
-        final UserDetails mary
-                = User.builder()
-                .username("mary")
-                .password("{noop}test123")
-                .roles("EMPLOYEE, MANAGER")
-                .build();
-
-        final UserDetails susan
-                = User.builder()
-                .username("susan")
-                .password("{noop}test123")
-                .roles("EMPLOYEE, MANAGER, ADMIN")
-                .build();
-        return new InMemoryUserDetailsManager(john, mary, susan);
-    }
-    */
 }
